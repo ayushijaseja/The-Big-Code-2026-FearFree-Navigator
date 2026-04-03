@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
-import MapEngine from './components/MapEngine';
-import Sidebar from './components/Sidebar';
+import MapEngine from './components/map/MapEngine';
+import Sidebar from './components/sidebar/Sidebar';
 
 const queryClient = new QueryClient();
 
@@ -12,7 +12,7 @@ const indexRoute = createRoute({
   path: '/',
   component: function Home() {
     return (
-      <div style={{ position: 'relative', width: '100vw', height: '100vh', backgroundColor: '#121212' }}>
+      <div className="relative h-screen w-screen bg-[#121212]">
         <Sidebar />
         <MapEngine />
       </div>

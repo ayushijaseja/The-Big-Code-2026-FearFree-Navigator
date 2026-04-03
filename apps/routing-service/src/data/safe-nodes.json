@@ -1,0 +1,6 @@
+[
+  { "name": "IIITA Main Gate", "lat": 25.4294, "lng": 81.7702, "boost": 15 },
+  { "name": "Civil Lines E-Rickshaw Hub", "lat": 25.4484, "lng": 81.8336, "boost": 20 },
+  { "name": "Prayagraj Junction Entrance", "lat": 25.4447, "lng": 81.8251, "boost": 15 },
+  { "name": "V-Mart Crossing", "lat": 25.4388, "lng": 81.7928, "boost": 10 }
+]

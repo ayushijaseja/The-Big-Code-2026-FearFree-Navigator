@@ -47,8 +47,9 @@ export default async function get_safe_route(req: Request, res: Response) {
                 polyline: route.overview_polyline.points,
                 coordinates: coordinates,
                 metrics: {
-                    safePlacesCount: safetyData.safePlacesCount,
-                    litRoadsPercentage: 0 // We'll add OSM data later
+                    // FIX: Access safePlacesCount and litRoadsPercentage from the metrics object
+                    safePlacesCount: safetyData.metrics.safePlacesCount,
+                    litRoadsPercentage: safetyData.metrics.litRoadsPercentage
                 }
             };
         });

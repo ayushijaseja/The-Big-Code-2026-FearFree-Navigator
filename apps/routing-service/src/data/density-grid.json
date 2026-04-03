@@ -1,0 +1,12 @@
+{
+  "sectors": [
+    { "name": "IIITA Admin & Residential", "lat": 25.429, "lng": 81.770, "radius": 400, "densityScore": 45 },
+    { "name": "Jhalwa Chauraha (Market)", "lat": 25.435, "lng": 81.765, "radius": 300, "densityScore": 40 }, 
+    { "name": "Peepalgon Main Road", "lat": 25.424, "lng": 81.776, "radius": 500, "densityScore": 30 },
+    { "name": "Dhoomanganj Thana Area", "lat": 25.435, "lng": 81.795, "radius": 600, "densityScore": 45 },
+    { "name": "Pani Tanki / High Court Area", "lat": 25.445, "lng": 81.815, "radius": 600, "densityScore": 50 },
+    { "name": "Civil Lines / V-Mart Zone", "lat": 25.448, "lng": 81.833, "radius": 1000, "densityScore": 55 },
+    { "name": "Prayagraj Junction (South/City)", "lat": 25.444, "lng": 81.825, "radius": 500, "densityScore": 45 },
+    { "name": "Kalindipuram Buffer Zone", "lat": 25.428, "lng": 81.785, "radius": 1200, "densityScore": 15 }
+  ]
+}
