@@ -41,3 +41,10 @@ export interface EmergencyRerouteResponse {
   };
   reroutePolyline: string;
 }
+
+interface ChatContext {
+    userMessage: string;
+    currentLocation?: { lat: number, lng: number };
+    destination?: string;
+    routeDistance?: string;
+}

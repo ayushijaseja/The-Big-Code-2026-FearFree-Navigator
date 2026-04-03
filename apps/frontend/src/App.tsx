@@ -3,6 +3,7 @@ import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tan
 import MapEngine from './components/map/MapEngine';
 import Sidebar from './components/sidebar/Sidebar';
 import SOSController from './components/SOS/SOSController';
+import { SafetyAssistant } from './components/chat/SafetyAssisstant';
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const indexRoute = createRoute({
         <Sidebar />
         <MapEngine />
         <SOSController />
+        <SafetyAssistant />
       </div>
     );
   },

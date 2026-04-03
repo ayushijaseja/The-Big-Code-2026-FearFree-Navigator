@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as turf from '@turf/turf';
 import axios from 'axios';
 import safeNodes from '../data/safe-nodes.json';
+import { broadcastSOS } from '../services/notification.service';
 
 export default async function handle_sos(req: Request, res: Response) {
     try {
@@ -36,12 +37,23 @@ export default async function handle_sos(req: Request, res: Response) {
             return res.status(404).json({ error: "No escape route found." });
         }
 
+        
         const currentRoute = directions.data.routes[0];
         const currentLeg = currentRoute.legs[0];
         
         const nextInstruction = currentLeg.steps && currentLeg.steps.length > 0 
-            ? currentLeg.steps[0].html_instructions 
-            : "Proceed to the destination.";
+        ? currentLeg.steps[0].html_instructions 
+        : "Proceed to the destination.";
+        
+        broadcastSOS({
+            lat,
+            lng,
+            safeHavenName: nearest.name,
+            distanceToSafety: currentLeg.distance.text,
+            // If you pass sensor data in the req.body from the frontend, you can add it here!
+            sensorMagnitude: req.body.sensorMagnitude || 18.5, 
+            timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+        }).catch(e => console.error("Broadcast failed:", e));
 
         res.json({
             message: "🚨 EMERGENCY REROUTE ACTIVE",
