@@ -1,19 +1,32 @@
-import { useEffect, type MutableRefObject } from 'react';
+import { useEffect } from 'react';
 import type { RouteResponse } from '@fear-free/shared-types';
 
 export const useMapBounds = (
-  mapRef: MutableRefObject<google.maps.Map | null>,
-  routeData: RouteResponse | null
+  map: google.maps.Map | null,
+  routeData: RouteResponse | null,
+  emergencyData: any | null 
 ) => {
   useEffect(() => {
-    if (routeData && routeData.routes.length > 0 && mapRef.current) {
-      const bounds = new window.google.maps.LatLngBounds();
-      
+    if (!map) return;
+    
+    const bounds = new window.google.maps.LatLngBounds();
+    let shouldZoom = false;
+
+    if (emergencyData && emergencyData.coordinates?.length > 0) {
+      emergencyData.coordinates.forEach((coord: any) => {
+        bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng));
+      });
+      shouldZoom = true;
+    } 
+    else if (routeData && routeData.routes?.length > 0) {
       routeData.routes[0].coordinates.forEach((coord) => {
         bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng));
       });
-
-      mapRef.current.fitBounds(bounds, 80);
+      shouldZoom = true;
     }
-  }, [routeData, mapRef]);
+
+    if (shouldZoom) {
+      map.fitBounds(bounds, 80); 
+    }
+  }, [map, routeData, emergencyData]); 
 };

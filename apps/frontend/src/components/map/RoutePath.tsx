@@ -3,14 +3,15 @@ import type { RouteResponse } from '@fear-free/shared-types';
 
 interface RoutePathsProps {
   routes: RouteResponse['routes'];
+  searchKey: string; 
 }
 
-export const RoutePaths = ({ routes }: RoutePathsProps) => {
+export const RoutePaths = ({ routes, searchKey }: RoutePathsProps) => {
   return (
     <>
       {routes.map((route, index) => (
         <Polyline
-          key={route.routeId}
+          key={`${searchKey}-${route.routeId || index}`} 
           path={route.coordinates}
           options={{
             strokeColor: index === 0 ? '#00FF00' : index === 1 ? '#00FFFF' : '#FFFFFF',

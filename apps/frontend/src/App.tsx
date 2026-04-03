@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
 import MapEngine from './components/map/MapEngine';
 import Sidebar from './components/sidebar/Sidebar';
+import SOSController from './components/SOS/SOSController';
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ const indexRoute = createRoute({
       <div className="relative h-screen w-screen bg-[#121212]">
         <Sidebar />
         <MapEngine />
+        <SOSController />
       </div>
     );
   },
