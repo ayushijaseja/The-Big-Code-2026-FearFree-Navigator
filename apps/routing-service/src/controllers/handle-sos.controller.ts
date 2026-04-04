@@ -50,7 +50,6 @@ export default async function handle_sos(req: Request, res: Response) {
             lng,
             safeHavenName: nearest.name,
             distanceToSafety: currentLeg.distance.text,
-            // If you pass sensor data in the req.body from the frontend, you can add it here!
             sensorMagnitude: req.body.sensorMagnitude || 18.5, 
             timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
         }).catch(e => console.error("Broadcast failed:", e));

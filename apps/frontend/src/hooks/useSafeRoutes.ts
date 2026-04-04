@@ -10,6 +10,7 @@ interface RouteParams {
 
 export const useSafeRoutes = () => {
   const setRouteData = useMapStore((state) => state.setRouteData);
+  const setStandardBriefing = useMapStore((state) => state.setStandardBriefing);
 
   return useMutation({
     mutationFn: async ({ origin, destination }: RouteParams) => {
@@ -21,6 +22,20 @@ export const useSafeRoutes = () => {
     },
     onSuccess: (data) => {
       setRouteData(data);
+      
+      setStandardBriefing(null);
+
+      if (data.sessionId) {
+        axios.post(`${import.meta.env.VITE_API_URL}/routes/route-briefing`, {
+          sessionId: data.sessionId
+        })
+        .then((res) => {
+          setStandardBriefing(res.data);
+        })
+        .catch((error) => {
+          console.error("Failed to load standard AI briefing:", error);
+        });
+      }
     },
     onError: (error) => {
       console.error("Failed to fetch routes:", error);

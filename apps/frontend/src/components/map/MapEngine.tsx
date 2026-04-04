@@ -7,6 +7,7 @@ import { containerStyle, initialCenter, darkMapOptions } from '../../constants/m
 import { RoutePaths } from './RoutePath';
 import { EmergencyRoute } from './EmergencyRoute';
 import { NavigationCard } from './NavigationCard';
+import { SafetyBriefingCard } from './SafetyBreifingCard';
 
 export default function MapEngine() {
     const { isLoaded } = useJsApiLoader({
@@ -44,6 +45,7 @@ export default function MapEngine() {
     return (
         <div className="relative h-screen w-full">
             <NavigationCard />
+            <SafetyBriefingCard />
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={initialCenter}

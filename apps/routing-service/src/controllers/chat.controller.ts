@@ -3,7 +3,7 @@ import { processUserChat } from '../services/chat.service';
 
 export default async function handle_chat(req: Request, res: Response) {
     try {
-        const { message, currentLocation, destination } = req.body;
+        const { message, currentLocation, destination, routeDistance, aiBriefing, sessionId } = req.body;
 
         if (!message) {
             return res.status(400).json({ error: "Message is required" });
@@ -12,7 +12,10 @@ export default async function handle_chat(req: Request, res: Response) {
         const reply = await processUserChat({
             userMessage: message,
             currentLocation,
-            destination
+            destination,
+            routeDistance,
+            aiBriefing,
+            sessionId,
         });
 
         res.json({ reply });

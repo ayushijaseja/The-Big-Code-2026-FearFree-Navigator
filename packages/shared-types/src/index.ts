@@ -10,6 +10,7 @@ export interface SafeRoute {
   safetyScore: number;
   polyline: string;      
   coordinates: Coordinate[];
+  aiBrefing?: string;
   metrics: {
     safePlacesCount: number;
     litRoadsPercentage: number;
@@ -19,6 +20,7 @@ export interface SafeRoute {
 export interface RouteResponse {
   message: string;
   origin: string;
+  sessionId: string;
   destination: string;
   totalRoutes: number;
   routes: SafeRoute[];

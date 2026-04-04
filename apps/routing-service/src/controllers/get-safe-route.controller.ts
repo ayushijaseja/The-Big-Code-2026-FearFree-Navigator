@@ -3,6 +3,7 @@ import axios from 'axios';
 import polyline from '@mapbox/polyline';
 import { RouteResponse, SafeRoute } from '@fear-free/shared-types';
 import { calculateRouteSafetyScore } from '../services/safety.service'; 
+import { routeContextService } from '../services/context.service';
 
 export default async function get_safe_route(req: Request, res: Response) {
     try {
@@ -29,14 +30,10 @@ export default async function get_safe_route(req: Request, res: Response) {
 
         const routesData = response.data.routes;
 
-        // --- UPDATED LOGIC HERE ---
-        // We map over the routes, but because calculateRouteSafetyScore is async, 
-        // we map them into an array of Promises, then await them all.
-        const processedRoutesPromises = routesData.map(async (route: any, index: number): Promise<SafeRoute> => {
+        const processedRoutesPromises = routesData.map(async (route: any, index: number) => {
             const decodedPath = polyline.decode(route.overview_polyline.points);
             const coordinates = decodedPath.map((point: number[]) => ({ lat: point[0], lng: point[1] }));
 
-            // 🧠 Send the coordinates to our Safety Engine!
             const safetyData = await calculateRouteSafetyScore(coordinates);
 
             return {
@@ -47,25 +44,32 @@ export default async function get_safe_route(req: Request, res: Response) {
                 polyline: route.overview_polyline.points,
                 coordinates: coordinates,
                 metrics: {
-                    // FIX: Access safePlacesCount and litRoadsPercentage from the metrics object
                     safePlacesCount: safetyData.metrics.safePlacesCount,
                     litRoadsPercentage: safetyData.metrics.litRoadsPercentage
-                }
+                },
+                aiBreafing: " ",
+                _safePlacesList: safetyData.metrics.safePlacesList || [] 
             };
         });
 
-        // Wait for all routes to finish calculating their scores
         const processedRoutes = await Promise.all(processedRoutesPromises);
         
-        // Sort routes so the highest safety score is always first!
         processedRoutes.sort((a, b) => b.safetyScore - a.safetyScore);
+
+        const sessionId = routeContextService.saveRouteContext(origin, destination, processedRoutes);
+
+        const frontendRoutes: SafeRoute[] = processedRoutes.map(route => {
+            const { _safePlacesList, ...cleanRoute } = route;
+            return cleanRoute as SafeRoute; 
+        });
 
         const payload: RouteResponse = {
             message: "Routes fetched and scored successfully",
+            sessionId,
             origin,
             destination,
-            totalRoutes: processedRoutes.length,
-            routes: processedRoutes
+            totalRoutes: frontendRoutes.length,
+            routes: frontendRoutes
         };
 
         res.json(payload);

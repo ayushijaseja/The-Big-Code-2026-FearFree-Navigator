@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMapStore } from '../store/useMapStore';
+// import { calculateDistance } from '../utils/geoMath';
 
 export interface ChatMessage {
   role: 'user' | 'ai';
@@ -12,6 +13,7 @@ export const useSafetyChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'ai', text: "Hi, I'm FearFree AI. Ask me about your route, recent safety alerts, or what to do next." }
   ]);
+  const aiBriefing = useMapStore((state) => state.emergencyData?.aiBriefing);
 
   const userLocation = useMapStore((state) => state.userLocation);
   const destination = useMapStore((state) => state.emergencyData?.safeHavenName);
@@ -37,7 +39,9 @@ export const useSafetyChat = () => {
         body: JSON.stringify({
           message: userText,
           currentLocation: userLocation || { lat: 25.4294, lng: 81.7702 }, 
-          destination: destination || "Unknown"
+          destination: destination || "Unknown",
+          // routeDistance: calculateDistance(userLocation?.lat, userLocation?.lng, destination)
+          aiBriefing: aiBriefing,
         }),
       });
 
@@ -56,7 +60,7 @@ export const useSafetyChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, userLocation, destination]);
+  }, [input, isLoading, userLocation, destination, aiBriefing]);
 
   return {
     input,

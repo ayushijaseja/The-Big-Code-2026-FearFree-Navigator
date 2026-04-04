@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import type { RouteResponse, Coordinate } from '@fear-free/shared-types';
 
+export interface SafetyBriefing {
+  safetySummary: string;
+  primaryRisk: string;
+  tacticalAdvice: string;
+}
+
 interface EmergencyData {
   polyline: string;
   coordinates: Coordinate[];
@@ -8,6 +14,7 @@ interface EmergencyData {
   distance: string;
   duration: string;
   currentInstruction: string;
+  aiBriefing?: SafetyBriefing;
 }
 
 interface MapState {
@@ -16,13 +23,18 @@ interface MapState {
 
   isEmergencyMode: boolean;
   emergencyData: EmergencyData | null;
-  
+
   setEmergencyRoute: (data: EmergencyData) => void;
   clearRoutes: () => void;
   exitEmergencyMode: () => void;
 
   userLocation: { lat: number; lng: number } | null;
   setUserLocation: (coords: { lat: number; lng: number } | null) => void;
+
+  injectAIBriefing: (briefing: SafetyBriefing) => void;
+
+  standardBriefing: SafetyBriefing | null; 
+  setStandardBriefing: (briefing: SafetyBriefing | null) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -30,29 +42,37 @@ export const useMapStore = create<MapState>((set) => ({
   isEmergencyMode: false,
   emergencyData: null,
   userLocation: null,
+  standardBriefing: null,
+
+  setStandardBriefing: (briefing) => set({ standardBriefing: briefing }),
 
   setUserLocation: (coords) => set({ userLocation: coords }),
 
-  setRouteData: (data) => set({ 
-    routeData: data, 
-    isEmergencyMode: false, 
-    emergencyData: null 
+  setRouteData: (data) => set({
+    routeData: data,
+    isEmergencyMode: false,
+    emergencyData: null
   }),
 
-  setEmergencyRoute: (data) => set({ 
-    isEmergencyMode: true, 
+  setEmergencyRoute: (data) => set({
+    isEmergencyMode: true,
     emergencyData: data,
-    routeData: null 
+    routeData: null
   }),
 
-  exitEmergencyMode: () => set({ 
-    isEmergencyMode: false, 
-    emergencyData: null 
+  exitEmergencyMode: () => set({
+    isEmergencyMode: false,
+    emergencyData: null
   }),
 
-  clearRoutes: () => set({ 
-    routeData: null, 
-    isEmergencyMode: false, 
-    emergencyData: null 
+  clearRoutes: () => set({
+    routeData: null,
+    isEmergencyMode: false,
+    emergencyData: null
   }),
+
+  injectAIBriefing: (briefing) =>
+    set((state) => ({
+      emergencyData: state.emergencyData ? { ...state.emergencyData, aiBriefing: briefing } : null
+    })),
 }));
