@@ -44,6 +44,9 @@ interface MapState {
 
   triggerEmergencyMode: () => void;
 
+  isSosOverlayOpen: boolean;
+  setSosOverlayOpen: (open: boolean) => void;
+
   currentInstruction: string | null;
   setCurrentInstruction: (instruction: string) => void;
 }
@@ -56,10 +59,13 @@ export const useMapStore = create<MapState>((set) => ({
   standardBriefing: null,
   isActiveEscortOpen: false,
   currentInstruction: null,
+  isSosOverlayOpen: false,
+  setSosOverlayOpen: (open) => set({ isSosOverlayOpen: open }),
+  
 
   setCurrentInstruction: (instruction) => set({ currentInstruction: instruction }),
 
-  triggerEmergencyMode: () => set({ isEmergencyMode: true }),
+  triggerEmergencyMode: () => set({ isEmergencyMode: true, isSosOverlayOpen: false }),
 
   openActiveEscort: () => set({ isActiveEscortOpen: true }),
   closeActiveEscort: () => set({ isActiveEscortOpen: false }),

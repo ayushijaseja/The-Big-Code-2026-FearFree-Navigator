@@ -1,16 +1,26 @@
 import { useState } from 'react';
 import { MessageCircle, X, Send, Bot, Loader2, Mic } from 'lucide-react';
 import { useSafetyChat, type ChatMessage } from '../../hooks/useSafetyChat';
+import { useAutonomousGuardian } from '../../hooks/useAutonomousGuardian';
 
 export const SafetyAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const chat = useSafetyChat();
 
+  const { isDoomsdayActive } = useAutonomousGuardian(
+    isOpen,
+    setIsOpen,
+    chat.messages,
+    chat.setMessages as React.Dispatch<React.SetStateAction<ChatMessage[]>>
+  );
+
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-4 left-4 z-100 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 dark:bg-slate-800 dark:border dark:border-gray-700 ${isOpen ? 'hidden' : 'block'}`}
+        className={`fixed bottom-4 left-4 z-100 flex h-14 w-14 items-center justify-center rounded-full transition-transform hover:scale-110 shadow-[0_10px_25px_rgba(0,0,0,0.5)] ${
+          isDoomsdayActive ? 'bg-red-600 animate-pulse' : 'bg-slate-900 dark:bg-slate-800'
+        } text-white dark:border dark:border-gray-700 ${isOpen ? 'hidden' : 'block'}`}
       >
         <MessageCircle size={28} />
       </button>

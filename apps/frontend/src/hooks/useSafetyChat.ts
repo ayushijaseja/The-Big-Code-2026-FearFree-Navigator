@@ -31,19 +31,17 @@ export const useSafetyChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Setup Speech Recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
-    recognition.continuous = true; // Keep listening while button is held
-    recognition.interimResults = true; // Show live typing
+    recognition.continuous = true; 
+    recognition.interimResults = true;
     recognition.lang = 'en-IN';
 
     recognition.onresult = (event: any) => {
@@ -59,17 +57,15 @@ export const useSafetyChat = () => {
     recognitionRef.current = recognition;
   }, []);
 
-  // Quick Native TTS Engine
   const speakOutLoud = (text: string) => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any current speech
+      window.speechSynthesis.cancel(); 
       
-      // Strip emojis and markdown formatting for cleaner speech
       const cleanText = text.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/[*#_]/g, '');
       
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.rate = 1.05; // Slightly faster for emergencies
-      utterance.pitch = 1.1; // Friendly tone
+      utterance.rate = 1.05;
+      utterance.pitch = 1.1;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -101,12 +97,10 @@ export const useSafetyChat = () => {
         text: data.reply || "Sorry, I couldn't process that." 
       }]);
 
-      // 🎙️ READ OUT LOUD IF THEY USED THE MIC!
       if (wasVoiceActivated && data.reply) {
         speakOutLoud(data.reply);
       }
 
-      // Agentic Map Control
       if (data.action === "TRIGGER_SOS" && data.emergencyData) {
         const decodedPath = polyline.decode(data.emergencyData.polyline);
         const coordinates = decodedPath.map((p: number[]) => ({ lat: p[0], lng: p[1] }));
@@ -129,7 +123,6 @@ export const useSafetyChat = () => {
   }, [input, isLoading, userLocation, destination, aiBriefing, setEmergencyRoute]);
 
 
-  // Walkie-Talkie Controls
   const startRecording = () => {
     setInput('');
     setIsRecording(true);
@@ -140,9 +133,7 @@ export const useSafetyChat = () => {
     setIsRecording(false);
     try { recognitionRef.current?.stop(); } catch(e) {}
     
-    // We use a tiny timeout so React state catches up with the final transcript
     setTimeout(() => {
-      // We pass `true` so the AI knows to speak its response!
       setInput((latestInput) => {
         handleSend(latestInput, true);
         return ''; 
@@ -158,6 +149,7 @@ export const useSafetyChat = () => {
     messages,
     handleSend,
     startRecording,
+    setMessages,
     stopRecording,
     messagesEndRef
   };

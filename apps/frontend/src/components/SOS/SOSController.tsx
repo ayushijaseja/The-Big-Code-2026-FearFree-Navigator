@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import SOSOverlay from './SOSOverlay';
 import { useEmergencyReroute } from '../../hooks/useEmergencyReroute';
 import { useLiveLocation } from '../../hooks/useLiveLocation'; 
@@ -10,11 +10,12 @@ import { useAnomalyDetection } from '../../hooks/useAnolomalyDetection';
 const REROUTE_THRESHOLD_METERS = 25; 
 
 export default function SOSController() {
-  const [isSosActive, setIsSosActive] = useState(false);
   const { executeReroute } = useEmergencyReroute();
   
   const isEmergencyMode = useMapStore((state) => state.isEmergencyMode);
   const userLocation = useMapStore((state) => state.userLocation);
+  const setIsSosActive = useMapStore((state) => state.setSosOverlayOpen);
+  const isSosActive = useMapStore((state) => state.isSosOverlayOpen);
   
   const lastRoutedLocation = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -63,7 +64,7 @@ export default function SOSController() {
     <>
       <SOSOverlay 
         isOpen={isSosActive} 
-        onCancel={() => setIsSosActive(false)} 
+        onCancel={() => setIsSosActive(true)} 
         onConfirm={handleConfirmSOS} 
       />
       
