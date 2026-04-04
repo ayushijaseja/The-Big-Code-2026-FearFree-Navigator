@@ -1,9 +1,9 @@
-interface Location {
+export interface Location {
   lat: number;
   lng: number;
 }
 
-const FALLBACK_LOCATION: Location = { lat: 25.4294, lng: 81.7702 };
+const FALLBACK_LOCATION: Location = { lat: 25.4294, lng: 81.7702 }; // IIIT Allahabad
 
 export const getCurrentLocation = async (): Promise<Location> => {
   try {

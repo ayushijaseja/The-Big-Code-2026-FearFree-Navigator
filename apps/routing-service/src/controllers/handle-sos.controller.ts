@@ -45,14 +45,14 @@ export default async function handle_sos(req: Request, res: Response) {
         ? currentLeg.steps[0].html_instructions 
         : "Proceed to the destination.";
         
-        broadcastSOS({
-            lat,
-            lng,
-            safeHavenName: nearest.name,
-            distanceToSafety: currentLeg.distance.text,
-            sensorMagnitude: req.body.sensorMagnitude || 18.5, 
-            timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-        }).catch(e => console.error("Broadcast failed:", e));
+        // broadcastSOS({
+        //     lat,
+        //     lng,
+        //     safeHavenName: nearest.name,
+        //     distanceToSafety: currentLeg.distance.text,
+        //     sensorMagnitude: req.body.sensorMagnitude || 18.5, 
+        //     timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+        // }).catch(e => console.error("Broadcast failed:", e));
 
         res.json({
             message: "🚨 EMERGENCY REROUTE ACTIVE",

@@ -14,7 +14,7 @@ export const SafetyBriefingCard = () => {
   if (!activeBriefing) return null;
 
   return (
-    <div className="absolute top-8 right-8 z-100 flex flex-col items-end">
+    <div className="absolute top-20 right-4 z-100 flex flex-col items-end">
       
       {!isOpen && (
         <button

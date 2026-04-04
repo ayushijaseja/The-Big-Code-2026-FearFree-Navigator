@@ -36,10 +36,15 @@ export default async function get_safe_route(req: Request, res: Response) {
 
             const safetyData = await calculateRouteSafetyScore(coordinates);
 
+            const currentLeg = route.legs[0];
+            const nextInstruction = currentLeg.steps && currentLeg.steps.length > 0 
+                ? currentLeg.steps[0].html_instructions 
+                : "Proceed to the destination.";
+
             return {
                 routeId: `route_${index + 1}`,
-                distance: route.legs[0].distance.text,
-                duration: route.legs[0].duration.text,
+                distance: currentLeg.distance.text, 
+                duration: currentLeg.duration.text,
                 safetyScore: safetyData.score, 
                 polyline: route.overview_polyline.points,
                 coordinates: coordinates,
@@ -48,6 +53,7 @@ export default async function get_safe_route(req: Request, res: Response) {
                     litRoadsPercentage: safetyData.metrics.litRoadsPercentage
                 },
                 aiBreafing: " ",
+                instructions: nextInstruction,
                 _safePlacesList: safetyData.metrics.safePlacesList || [] 
             };
         });

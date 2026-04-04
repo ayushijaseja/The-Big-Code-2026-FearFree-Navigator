@@ -9,20 +9,36 @@ import { EmergencyRoute } from './EmergencyRoute';
 import { NavigationCard } from './NavigationCard';
 import { SafetyBriefingCard } from './SafetyBreifingCard';
 import { ActiveEscortWidget } from '../fake-call/ActiveEscortWidget';
+import { useGuardiansNetwork } from '../../hooks/useGuardianNetwork';
+import { useLocationBackgroundSync } from '../../hooks/useLocationBackgroundSync';
+import { getCurrentLocation } from '../../utils/geolocation';
+import { GuardianMarkers } from './GuardianMarkers';
 
 export default function MapEngine() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_CLOUD_API_KEY
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_CLOUD_API_KEY,
     });
 
     const routeData = useMapStore((state) => state.routeData);
     const isEmergencyMode = useMapStore((state) => state.isEmergencyMode);
     const emergencyData = useMapStore((state) => state.emergencyData);
     const userLocation = useMapStore((state) => state.userLocation);
+    const setUserLocation = useMapStore((state) => state.setUserLocation);
 
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const isMapAlive = useMapFlicker([routeData, emergencyData]);
+
+    useEffect(() => {
+        const initLocation = async () => {
+            if (!userLocation) {
+                const loc = await getCurrentLocation();
+                setUserLocation(loc);
+            }
+        };
+
+        initLocation();
+    }, [userLocation, setUserLocation]);
 
     useMapBounds(map, routeData, emergencyData);
 
@@ -34,6 +50,9 @@ export default function MapEngine() {
 
     const onLoad = useCallback((m: google.maps.Map) => setMap(m), []);
     const onUnmount = useCallback(() => setMap(null), []);
+
+    useLocationBackgroundSync();
+    const nearbyGuardians = useGuardiansNetwork(2000);
 
     if (!isLoaded || !isMapAlive) {
         return (
@@ -65,6 +84,8 @@ export default function MapEngine() {
                         safeHavenName={emergencyData.safeHavenName}
                     />
                 )}
+
+                <GuardianMarkers guardians={nearbyGuardians} />
 
                 {isEmergencyMode && userLocation && (
                     <Marker
