@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Loader2, Mic } from 'lucide-react';
 import { useSafetyChat, type ChatMessage } from '../../hooks/useSafetyChat';
 
 export const SafetyAssistant = () => {
@@ -27,6 +27,9 @@ export const SafetyAssistant = () => {
         />
         
         <ChatInput 
+          isRecording={chat.isRecording}
+          startRecording={chat.startRecording}
+          stopRecording={chat.stopRecording}
           input={chat.input} 
           setInput={chat.setInput} 
           isLoading={chat.isLoading} 
@@ -86,26 +89,58 @@ const ChatInput = ({
   input, 
   setInput, 
   isLoading, 
-  handleSend 
+  handleSend,
+  isRecording,
+  startRecording,
+  stopRecording
 }: { 
   input: string, 
   setInput: (v: string) => void, 
   isLoading: boolean, 
-  handleSend: () => void 
+  handleSend: () => void,
+  isRecording: boolean,
+  startRecording: () => void,
+  stopRecording: () => void
 }) => (
   <div className="border-t border-slate-200 bg-white p-4 dark:border-gray-800 dark:bg-[#121212]">
-    <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:focus-within:border-blue-500 dark:focus-within:bg-gray-800 dark:focus-within:ring-blue-900/30 transition-all">
+    <div className={`flex items-center gap-2 rounded-full border px-4 py-2 transition-all ${
+      isRecording 
+        ? 'border-red-500 bg-red-50 ring-2 ring-red-200 dark:bg-red-900/20 dark:border-red-500/50' 
+        : 'border-slate-200 bg-slate-50 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 dark:border-gray-700 dark:bg-gray-800'
+    }`}>
+      
+      <button
+        onMouseDown={startRecording}
+        onMouseUp={stopRecording}
+        onMouseLeave={isRecording ? stopRecording : undefined}
+        onTouchStart={startRecording} 
+        onTouchEnd={stopRecording}
+        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+          isRecording 
+            ? 'animate-pulse bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.6)]' 
+            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+        }`}
+      >
+        <Mic size={16} />
+      </button>
+
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-        placeholder="Ask about route safety..."
-        className="flex-1 bg-transparent text-sm outline-none text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-gray-500"
+        placeholder={isRecording ? "Listening..." : "Ask about route safety..."}
+        readOnly={isRecording}
+        className={`flex-1 bg-transparent text-sm outline-none transition-colors ${
+          isRecording 
+            ? 'text-red-700 placeholder:text-red-400 dark:text-red-400 dark:placeholder:text-red-500/50' 
+            : 'text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-gray-500'
+        }`}
       />
+
       <button 
-        onClick={handleSend}
-        disabled={isLoading || !input.trim()}
+        onClick={() => handleSend()}
+        disabled={isLoading || !input.trim() || isRecording}
         className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white transition-opacity disabled:opacity-50"
       >
         <Send size={16} className="ml-1" />
