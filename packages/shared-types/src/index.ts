@@ -11,6 +11,7 @@ export interface SafeRoute {
   polyline: string;      
   coordinates: Coordinate[];
   aiBrefing?: string;
+  instructions: string;
   metrics: {
     safePlacesCount: number;
     litRoadsPercentage: number;

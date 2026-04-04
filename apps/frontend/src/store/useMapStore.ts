@@ -16,6 +16,7 @@ interface EmergencyData {
   currentInstruction: string;
   aiBriefing?: SafetyBriefing;
   sessionId: string
+  instructions: string
 }
 
 interface MapState {
@@ -42,6 +43,9 @@ interface MapState {
   closeActiveEscort: () => void;
 
   triggerEmergencyMode: () => void;
+
+  currentInstruction: string | null;
+  setCurrentInstruction: (instruction: string) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -51,6 +55,9 @@ export const useMapStore = create<MapState>((set) => ({
   userLocation: null,
   standardBriefing: null,
   isActiveEscortOpen: false,
+  currentInstruction: null,
+
+  setCurrentInstruction: (instruction) => set({ currentInstruction: instruction }),
 
   triggerEmergencyMode: () => set({ isEmergencyMode: true }),
 

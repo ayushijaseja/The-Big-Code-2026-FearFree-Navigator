@@ -11,6 +11,7 @@ interface RouteParams {
 export const useSafeRoutes = () => {
   const setRouteData = useMapStore((state) => state.setRouteData);
   const setStandardBriefing = useMapStore((state) => state.setStandardBriefing);
+  const setCurrentInstruction = useMapStore((state) => state.setCurrentInstruction); 
 
   return useMutation({
     mutationFn: async ({ origin, destination }: RouteParams) => {
@@ -22,6 +23,10 @@ export const useSafeRoutes = () => {
     },
     onSuccess: (data) => {
       setRouteData(data);
+      
+      if (data.routes && data.routes.length > 0) {
+        setCurrentInstruction(data.routes[0].instructions);
+      }
       
       setStandardBriefing(null);
 
