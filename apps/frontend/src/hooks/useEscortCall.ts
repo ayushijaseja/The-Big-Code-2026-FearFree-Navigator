@@ -18,7 +18,9 @@ export const useEscortCall = (onClose: () => void) => {
 
   const userLocation = useMapStore((state) => state.userLocation);
   const sessionId = useMapStore((state) => state.emergencyData?.sessionId || state.routeData?.sessionId);
-  const triggerSOS = useMapStore((state) => state.triggerEmergencyMode);
+  
+  const setEmergencyRoute = useMapStore((state) => state.setEmergencyRoute);
+  const triggerSOS = useMapStore((state) => state.triggerEmergencyMode); 
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -58,8 +60,15 @@ export const useEscortCall = (onClose: () => void) => {
       const data = await response.json();
 
       if (data.isSOS) {
-        onClose();
-        triggerSOS();
+        if (data.emergencyData) {
+          setEmergencyRoute({
+            ...data.emergencyData,
+            sessionId: `sos_escort_${Date.now()}`
+          });
+        } else {
+          triggerSOS();
+        }
+        onClose(); 
         return;
       }
 
@@ -81,7 +90,7 @@ export const useEscortCall = (onClose: () => void) => {
       isProcessingRef.current = false;
       setTranscript("Connection error. Try speaking again.");
     }
-  }, [userLocation, sessionId, onClose, triggerSOS, isMuted]);
+  }, [userLocation, sessionId, onClose, setEmergencyRoute, triggerSOS, isMuted]);
 
   useEffect(() => {
     if (!SpeechRecognition) return;

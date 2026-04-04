@@ -37,7 +37,6 @@ export const useGuardiansNetwork = (radiusInMeters = 2000) => {
         });
 
         const data = await response.json();
-        console.log("data", data);
         if (data.users) {
           setGuardians(data.users);
         }

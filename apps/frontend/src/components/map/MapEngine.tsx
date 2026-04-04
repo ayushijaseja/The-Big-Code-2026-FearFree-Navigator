@@ -54,6 +54,10 @@ export default function MapEngine() {
     useLocationBackgroundSync();
     const nearbyGuardians = useGuardiansNetwork(2000);
 
+    useEffect(()=>{
+        console.log(emergencyData);
+    },[emergencyData]);
+
     if (!isLoaded || !isMapAlive) {
         return (
             <div className="flex h-screen items-center justify-center bg-[#121212] text-white font-mono text-sm tracking-widest opacity-50">

@@ -6,6 +6,7 @@ interface EmergencyRouteProps {
 }
 
 export const EmergencyRoute = ({ coordinates, safeHavenName }: EmergencyRouteProps) => {
+    console.log(coordinates);
     if (!coordinates || coordinates.length === 0) return null;
 
     return (

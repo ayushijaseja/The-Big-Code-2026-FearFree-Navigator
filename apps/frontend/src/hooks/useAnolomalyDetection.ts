@@ -23,14 +23,12 @@ export const useAnomalyDetection = (onTrigger: () => void) => {
       }
     }
 
-    console.log("🚀 Anomaly Detection: ACTIVE");
     setIsMonitoring(true);
   }, []);
 
   const stopMonitoring = useCallback(() => {
     setIsMonitoring(false);
     spikeCount.current = 0;
-    console.log("🛑 Anomaly Detection: STOPPED");
   }, []);
 
   useEffect(() => {
@@ -62,7 +60,7 @@ export const useAnomalyDetection = (onTrigger: () => void) => {
       const magnitude = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
 
       if (logCounter % 20 === 0) {
-        console.log(`📊 Raw Magnitude: ${magnitude.toFixed(2)} | X: ${x.toFixed(1)} Y: ${y.toFixed(1)} Z: ${z.toFixed(1)}`);
+        // console.log(`📊 Raw Magnitude: ${magnitude.toFixed(2)} | X: ${x.toFixed(1)} Y: ${y.toFixed(1)} Z: ${z.toFixed(1)}`);
       }
       logCounter++;
 
@@ -77,7 +75,7 @@ export const useAnomalyDetection = (onTrigger: () => void) => {
         
         lastSpikeTime.current = now;
         
-        console.log(`🔥 SPIKE DETECTED! ${spikeCount.current}/${REQUIRED_SPIKES} (Mag: ${magnitude.toFixed(2)})`);
+        // console.log(`🔥 SPIKE DETECTED! ${spikeCount.current}/${REQUIRED_SPIKES} (Mag: ${magnitude.toFixed(2)})`);
 
         if (spikeCount.current >= REQUIRED_SPIKES) {
           console.log("🚨 SOS TRIGGER CRITERIA MET!");

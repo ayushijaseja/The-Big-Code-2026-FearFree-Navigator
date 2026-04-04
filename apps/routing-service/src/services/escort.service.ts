@@ -1,5 +1,6 @@
 import textToSpeech from '@google-cloud/text-to-speech';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import 'dotenv/config';
 
 const ttsClient = new textToSpeech.TextToSpeechClient({
     apiKey: process.env.GOOGLE_CLOUD_API_KEY

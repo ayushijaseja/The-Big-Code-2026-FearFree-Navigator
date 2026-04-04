@@ -9,7 +9,7 @@ export default async function handle_chat(req: Request, res: Response) {
             return res.status(400).json({ error: "Message is required" });
         }
 
-        const reply = await processUserChat({
+        const responsePayload = await processUserChat({
             userMessage: message,
             currentLocation,
             destination,
@@ -18,9 +18,10 @@ export default async function handle_chat(req: Request, res: Response) {
             sessionId,
         });
 
-        res.json({ reply });
+        res.json(responsePayload);
 
     } catch (error: any) {
+        console.error("Chat Controller Error:", error);
         res.status(500).json({ error: "Chat processing failed" });
     }
 }

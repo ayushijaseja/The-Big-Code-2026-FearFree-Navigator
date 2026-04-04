@@ -23,7 +23,6 @@ export const getCurrentLocation = async (): Promise<Location> => {
       );
     });
     
-    console.log("📍 GPS Lock Acquired:", coords);
     return coords;
   } catch (error) {
     console.warn("⚠️ GPS Failed or Denied. Using fallback location.", error);

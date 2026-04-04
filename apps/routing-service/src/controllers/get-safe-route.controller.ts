@@ -4,6 +4,7 @@ import polyline from '@mapbox/polyline';
 import { RouteResponse, SafeRoute } from '@fear-free/shared-types';
 import { calculateRouteSafetyScore } from '../services/safety.service'; 
 import { routeContextService } from '../services/context.service';
+import 'dotenv/config';
 
 export default async function get_safe_route(req: Request, res: Response) {
     try {

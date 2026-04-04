@@ -8,18 +8,22 @@ export const useEmergencyReroute = () => {
   const [error, setError] = useState<string | null>(null);
 
   const setEmergencyRoute = useMapStore((state) => state.setEmergencyRoute);
+  const injectAIBriefing = useMapStore((state) => state.injectAIBriefing);
 
   const executeReroute = useCallback(async (currentLocation: { lat: number; lng: number }) => {
     setIsRerouting(true);
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/v1/routes/handle-sos', currentLocation);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+      const response = await axios.post(`${API_URL}/routes/handle-sos`, currentLocation);
 
       const { polyline: encodedPolyline, safeHaven, distance, duration, instructions } = response.data;
 
       const decodedPath = polyline.decode(encodedPolyline);
       const coordinates = decodedPath.map((p: number[]) => ({ lat: p[0], lng: p[1] }));
+
+      const emergencySessionId = `sos_${Date.now()}`;
 
       setEmergencyRoute({
         polyline: encodedPolyline,
@@ -27,26 +31,16 @@ export const useEmergencyReroute = () => {
         safeHavenName: safeHaven.name,
         distance: distance || "Unknown",
         duration: duration || "Unknown",
-        currentInstruction: instructions || "Head towards the safe haven."
+        currentInstruction: instructions || "Head towards the safe haven immediately.",
+        instructions: instructions || "Head towards the safe haven immediately.",
+        sessionId: emergencySessionId
       });
 
-      fetch('http://localhost:5001/api/v1/routes/route-briefing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          metrics: {
-            ...response.data.metrics,
-            distance: response.data.distance,
-            duration: response.data.duration,
-            destinationName: response.data.safeHaven.name
-          }
-        })
-      })
-        .then(res => res.json())
-        .then(briefingData => {
-          useMapStore.getState().injectAIBriefing(briefingData);
-        })
-        .catch(err => console.error("Failed to load AI briefing", err));
+      injectAIBriefing({
+        safetySummary: `CRITICAL: Rerouting to ${safeHaven.name}.`,
+        primaryRisk: "Active Emergency SOS Triggered.",
+        tacticalAdvice: "Follow the red route immediately. Do not stop. Emergency contacts have been notified."
+      });
 
       return safeHaven;
 
@@ -57,7 +51,7 @@ export const useEmergencyReroute = () => {
     } finally {
       setIsRerouting(false);
     }
-  }, [setEmergencyRoute]);
+  }, [setEmergencyRoute, injectAIBriefing]);
 
   return { executeReroute, isRerouting, error };
 };

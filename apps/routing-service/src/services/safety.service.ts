@@ -3,6 +3,7 @@ import * as turf from '@turf/turf';
 import { Coordinate } from '@fear-free/shared-types';
 import safeNodes from '../data/safe-nodes.json';
 import densityGrid from '../data/density-grid.json';
+import 'dotenv/config';
 
 function sampleRoutePoints(coordinates: Coordinate[], intervalKm: number = 1): Coordinate[] {
     if (coordinates.length < 2) return coordinates;

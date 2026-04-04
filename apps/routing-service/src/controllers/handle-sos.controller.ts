@@ -3,6 +3,7 @@ import * as turf from '@turf/turf';
 import axios from 'axios';
 import safeNodes from '../data/safe-nodes.json';
 import { broadcastSOS } from '../services/notification.service';
+import 'dotenv/config';
 
 export default async function handle_sos(req: Request, res: Response) {
     try {
@@ -33,10 +34,14 @@ export default async function handle_sos(req: Request, res: Response) {
             proxy: false
         });
 
+        console.log("KEY", process.env.GOOGLE_CLOUD_API_KEY);
+        if (directions.data.status !== 'OK') {
+            console.error("🚨 GOOGLE MAPS API REJECTED REQUEST:", directions.data.status, directions.data.error_message);
+        }
+
         if (!directions.data.routes || directions.data.routes.length === 0) {
             return res.status(404).json({ error: "No escape route found." });
         }
-
         
         const currentRoute = directions.data.routes[0];
         const currentLeg = currentRoute.legs[0];
@@ -45,14 +50,14 @@ export default async function handle_sos(req: Request, res: Response) {
         ? currentLeg.steps[0].html_instructions 
         : "Proceed to the destination.";
         
-        // broadcastSOS({
-        //     lat,
-        //     lng,
-        //     safeHavenName: nearest.name,
-        //     distanceToSafety: currentLeg.distance.text,
-        //     sensorMagnitude: req.body.sensorMagnitude || 18.5, 
-        //     timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-        // }).catch(e => console.error("Broadcast failed:", e));
+        broadcastSOS({
+            lat,
+            lng,
+            safeHavenName: nearest.name,
+            distanceToSafety: currentLeg.distance.text,
+            sensorMagnitude: req.body.sensorMagnitude || 18.5, 
+            timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+        }).catch(e => console.error("Broadcast failed:", e));
 
         res.json({
             message: "🚨 EMERGENCY REROUTE ACTIVE",
