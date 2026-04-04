@@ -28,7 +28,7 @@ export default async function handle_sos(req: Request, res: Response) {
                 origin: `${lat},${lng}`,
                 destination: `${nearest.lat},${nearest.lng}`,
                 mode: 'walking',
-                key: process.env.GOOGLE_MAPS_API_KEY
+                key: process.env.GOOGLE_CLOUD_API_KEY
             },
             proxy: false
         });

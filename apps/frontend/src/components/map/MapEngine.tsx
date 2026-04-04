@@ -8,11 +8,12 @@ import { RoutePaths } from './RoutePath';
 import { EmergencyRoute } from './EmergencyRoute';
 import { NavigationCard } from './NavigationCard';
 import { SafetyBriefingCard } from './SafetyBreifingCard';
+import { ActiveEscortWidget } from '../fake-call/ActiveEscortWidget';
 
 export default function MapEngine() {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_CLOUD_API_KEY
     });
 
     const routeData = useMapStore((state) => state.routeData);
@@ -79,6 +80,7 @@ export default function MapEngine() {
                         zIndex={1000}
                     />
                 )}
+                <ActiveEscortWidget />
             </GoogleMap>
         </div>
     );

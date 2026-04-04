@@ -27,7 +27,7 @@ async function countSafePlacesNearby(lat: number, lng: number): Promise<number> 
     try {
         const radius = 200; 
         const keyword = 'pharmacy|police|hospital|atm|bank|restaurant|cafe';
-        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&keyword=${keyword}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&keyword=${keyword}&key=${process.env.GOOGLE_CLOUD_API_KEY}`;
         
         const response = await axios.get(url, { timeout: 5000, proxy: false });
         

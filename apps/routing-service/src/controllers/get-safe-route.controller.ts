@@ -19,7 +19,7 @@ export default async function get_safe_route(req: Request, res: Response) {
                 origin,
                 destination,
                 alternatives: true,
-                key: process.env.GOOGLE_MAPS_API_KEY
+                key: process.env.GOOGLE_CLOUD_API_KEY
             },
             proxy: false
         });

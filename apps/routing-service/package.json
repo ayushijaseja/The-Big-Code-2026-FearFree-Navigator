@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fear-free/shared-types": "workspace:*",
+    "@google-cloud/text-to-speech": "^6.4.0",
     "@google/generative-ai": "^0.24.1",
     "@mapbox/polyline": "^1.2.1",
     "@turf/turf": "^6.5.0",

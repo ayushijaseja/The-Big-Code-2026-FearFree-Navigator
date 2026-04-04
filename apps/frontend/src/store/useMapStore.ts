@@ -15,6 +15,7 @@ interface EmergencyData {
   duration: string;
   currentInstruction: string;
   aiBriefing?: SafetyBriefing;
+  sessionId: string
 }
 
 interface MapState {
@@ -35,6 +36,12 @@ interface MapState {
 
   standardBriefing: SafetyBriefing | null; 
   setStandardBriefing: (briefing: SafetyBriefing | null) => void;
+
+  isActiveEscortOpen: boolean;
+  openActiveEscort: () => void;
+  closeActiveEscort: () => void;
+
+  triggerEmergencyMode: () => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -43,6 +50,12 @@ export const useMapStore = create<MapState>((set) => ({
   emergencyData: null,
   userLocation: null,
   standardBriefing: null,
+  isActiveEscortOpen: false,
+
+  triggerEmergencyMode: () => set({ isEmergencyMode: true }),
+
+  openActiveEscort: () => set({ isActiveEscortOpen: true }),
+  closeActiveEscort: () => set({ isActiveEscortOpen: false }),
 
   setStandardBriefing: (briefing) => set({ standardBriefing: briefing }),
 
