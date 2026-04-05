@@ -1,159 +1,192 @@
-# Turborepo starter
+# Personal Safety & Intelligent Routing Application
 
-This Turborepo starter is maintained by the Turborepo core team.
+> A proactive, AI-powered personal safety companion that keeps you protected with intelligent routing, real-time anomaly detection, and context-aware assistance.
 
-## Using this example
+---
 
-Run the following command:
+## Overview
 
-```sh
-npx create-turbo@latest
+This application revolutionizes personal safety by combining cutting-edge AI, real-time sensor data, and intelligent routing to provide comprehensive protection. Whether you're walking home late at night, taking an unfamiliar route, or simply want peace of mind, our app has your back.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and pnpm installed
+- Python with Uvicorn
+- Required API keys (Gemini, mapping services, etc.)
+
+### Setup Instructions
+
+1. **Configure Environment Variables**
+   
+   Duplicate the `.env.example` files in each directory and rename them to `.env`:
+   ```bash
+   cp frontend/.env.example frontend/.env
+   cp routing-service/.env.example routing-service/.env
+   cp backend/.env.example backend/.env
+   ```
+   
+   Fill in all required API keys and credentials in each `.env` file.
+
+2. **Launch the Services**
+
+   Open three terminal windows and run:
+   
+   ```bash
+   # Terminal 1 - Frontend
+   cd frontend
+   pnpm run dev
+   ```
+   
+   ```bash
+   # Terminal 2 - Routing Service
+   cd routing-service
+   pnpm run dev
+   ```
+   
+   ```bash
+   # Terminal 3 - Backend
+   uvicorn main:app --reload --port 8000
+   ```
+
+3. **Access the Application**
+   
+   Once all services are running, open your browser and navigate to the frontend URL (typically `http://localhost:3000`).
+
+---
+
+## Features
+
+### 1. Intelligent Route Briefing
+
+Before you step out, our app analyzes your route using **Gemini 1.5 Flash**, a fast reasoning-capable LLM. Get instant, easy-to-read summaries highlighting:
+- Expected travel time
+- Route characteristics
+- Points of interest
+- Potential concerns
+
+### 2. Sensor-Driven Anomaly Detection & Dynamic Safe Spots
+
+Your device sensors work continuously to detect anomalies:
+- Sudden stops
+- Unexpected route deviations
+- Rapid or unusual movements
+
+**How it works:**
+- Anomaly detected → Safety confirmation prompt appears
+- No response within the time window → **Automatic rerouting to Dynamic Safe Spot**
+- Safe spots calculated using real-time data:
+  - Crowd density
+  - Street lighting conditions
+  - Proximity to verified locations
+
+### 3. Context-Aware Safety Agent
+
+An intelligent AI agent that always knows:
+- Your current location
+- Your destination
+- Nearby safe spots
+- Your route details
+
+**Capabilities:**
+- Natural conversation interface
+- Instant SOS triggering via voice command
+- Proactive safety suggestions
+- Real-time threat assessment
+
+### 4. Dynamic Deterrence Call (The "Fake Call")
+
+**Scenario:** You're in a cab late at night. The driver takes an unfamiliar turn. You feel uneasy.
+
+**Solution:** Trigger the deterrence feature.
+
+Your phone rings. You answer. But this isn't a pre-recorded message—it's a **fully dynamic, AI-powered conversation** using Gemini 2.5 Flash and advanced voice-to-text models.
+
+**Features:**
+- Real-time, contextual responses
+- Convincingly mimics a real person on the line
+- Mentions your live location naturally
+- Can silently trigger SOS if the situation escalates
+- Completely adaptive to your conversation
+
+### 5. Verified Guardian Beacons
+
+Special markers on your map show **Verified Guardians**—trusted, vetted individuals or safe havens nearby.
+
+**When to use:**
+- Feeling followed
+- Need immediate assistance
+- Want to reach a verified safe location quickly
+
+Navigate directly to these markers for guaranteed help.
+
+### 6. Autonomous Guardian
+
+**Silent protection that works in the background.**
+
+The system monitors for:
+- Extended periods without movement in desolate areas
+- Highly abnormal activity patterns
+- Deviation from expected behavior
+
+**Automatic response:**
+- AI agent automatically alerted
+- SOS protocols triggered without manual intervention
+- Emergency contacts notified
+- Location shared with authorities if needed
+
+---
+
+## Architecture
+
+```
+┌─────────────┐     ┌──────────────────┐     ┌─────────────┐
+│   Frontend  │────▶│ Routing Service  │────▶│   Backend   │
+│  (pnpm dev) │     │   (pnpm dev)     │     │ (Uvicorn)   │
+└─────────────┘     └──────────────────┘     └─────────────┘
+       │                     │                       │
+       └─────────────────────┴───────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   Gemini AI     │
+                    │  (2.5)    │
+                    └─────────────────┘
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## Privacy & Security
 
-### Apps and Packages
+- All sensor data processed locally when possible
+- End-to-end encryption for communications
+- No unnecessary data retention
+- User-controlled data sharing preferences
+- Compliant with privacy regulations
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Technology Stack
 
-### Utilities
+- **Frontend:** Modern web framework with real-time updates
+- **Routing Service:** Intelligent pathfinding and optimization
+- **Backend:** Python with Uvicorn (FastAPI)
+- **AI Models:** 
+  - Gemini 1.5 Flash (route analysis)
+  - Gemini 2.5 Flash (dynamic voice interactions)
+- **ML:** Custom anomaly detection models
+- **Sensors:** Device accelerometer, GPS, gyroscope
 
-This Turborepo has some additional tools already setup for you:
+---
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Use Cases
 
-### Build
+- **Late-night commutes:** Get home safely with real-time monitoring
+- **Unfamiliar areas:** Navigate with confidence knowing help is nearby
+- **Solo travelers:** Extra layer of security in new cities
+- **Emergency situations:** Quick access to help when you need it most
+- **Peace of mind:** For you and your loved ones
+---
 
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
