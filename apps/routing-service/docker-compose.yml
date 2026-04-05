@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  fearfree-db:
+    image: postgis/postgis:15-3.4 
+    container_name: fearfree_spatial_db
+    environment:
+      - POSTGRES_USER=fearfree_admin
+      - POSTGRES_PASSWORD=supersecret
+      - POSTGRES_DB=fearfree_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+
+volumes:
+  pgdata:

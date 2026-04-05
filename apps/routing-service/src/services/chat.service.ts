@@ -2,11 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { routeContextService } from './context.service';
 import 'dotenv/config';
 
-// ✅ Import the tools needed for the SOS Protocol
-import * as turf from '@turf/turf';
+import { sql } from 'drizzle-orm';
+import { db } from '../db'; 
 import axios from 'axios';
-import safeNodes from '../data/safe-nodes.json';
-import { broadcastSOS } from './notification.service'; // Adjust path if your notification service is elsewhere
+import { broadcastSOS } from './notification.service'; 
 
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -21,9 +20,6 @@ interface ChatContext {
 
 export const processUserChat = async (context: ChatContext) => {
     try {
-        // ==========================================
-        // AGENT 1: THE SECURITY BOUNCER (Fast SOS Check)
-        // ==========================================
         const sosAgent = ai.getGenerativeModel({
             model: "gemini-2.5-flash",
             tools: [{
@@ -46,18 +42,41 @@ export const processUserChat = async (context: ChatContext) => {
             if (context.currentLocation?.lat && context.currentLocation?.lng) {
                 const { lat, lng } = context.currentLocation;
         
-                const userPoint = turf.point([lng, lat]);
-                let nearest = safeNodes[0];
-                let minDistance = Infinity;
+                const nearestNodeResult = await db.execute<{ 
+                    id: number, 
+                    name: string, 
+                    type: string,
+                    lat: number, 
+                    lng: number, 
+                    distance_meters: number 
+                }>(sql`
+                    SELECT 
+                        id,
+                        name,
+                        type,
+                        ST_Y(location::geometry) as lat,
+                        ST_X(location::geometry) as lng,
+                        ST_Distance(
+                            location::geography, 
+                            ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
+                        ) as distance_meters
+                    FROM safe_nodes
+                    ORDER BY location <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geometry
+                    LIMIT 1;
+                `);
 
-                safeNodes.forEach(node => {
-                    const nodePoint = turf.point([node.lng, node.lat]);
-                    const distance = turf.distance(userPoint, nodePoint, { units: 'meters' });
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        nearest = node;
-                    }
-                });
+                const nearest = nearestNodeResult.rows[0];
+
+                if (!nearest) {
+                    console.error("CRITICAL: No safe havens found in database.");
+                    return { 
+                        reply: "🚨 Activating emergency protocol. I am trying to locate a safe haven, but the database is unresponsive. Please contact emergency services immediately.", 
+                        action: "TRIGGER_SOS"
+                    };
+                }
+
+                console.log(`🏥 AI Chat Routing to Safe Haven: ${nearest.name} (${Math.round(nearest.distance_meters)}m away)`);
+
                 const mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_CLOUD_API_KEY; 
                 
                 const directions = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
@@ -90,7 +109,12 @@ export const processUserChat = async (context: ChatContext) => {
                     emergencyData = {
                         message: "🚨 AI DETECTED DISTRESS - REROUTING",
                         safeHavenName: nearest.name,
-                        safeHaven: nearest,
+                        safeHaven: {
+                            name: nearest.name,
+                            type: nearest.type,
+                            lat: nearest.lat,
+                            lng: nearest.lng
+                        },
                         polyline: currentRoute.overview_polyline.points,
                         distance: currentLeg.distance.text,
                         duration: currentLeg.duration.text,

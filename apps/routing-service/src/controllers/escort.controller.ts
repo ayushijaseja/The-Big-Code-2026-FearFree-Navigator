@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import * as turf from '@turf/turf';
 import axios from 'axios';
 import polyline from '@mapbox/polyline'; 
-import safeNodes from '../data/safe-nodes.json';
+import { sql } from 'drizzle-orm';
+import { db } from '../db'; 
 import { processEscortCall } from '../services/escort.service';
 import { routeContextService } from '../services/context.service';
 import { broadcastSOS } from '../services/notification.service';
@@ -32,18 +32,36 @@ export default async function handle_escort_call(req: Request, res: Response) {
         if (callResponse.isSOS && lat && lng) {
             console.log("🚨 VOICE AI DETECTED EMERGENCY - TRIGGERING FULL SOS PROTOCOL");
 
-            const userPoint = turf.point([lng, lat]);
-            let nearest = safeNodes[0];
-            let minDistance = Infinity;
+            const nearestNodeResult = await db.execute<{ 
+                id: number, 
+                name: string, 
+                type: string,
+                lat: number, 
+                lng: number, 
+                distance_meters: number 
+            }>(sql`
+                SELECT 
+                    id,
+                    name,
+                    type,
+                    ST_Y(location::geometry) as lat,
+                    ST_X(location::geometry) as lng,
+                    ST_Distance(
+                        location::geography, 
+                        ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
+                    ) as distance_meters
+                FROM safe_nodes
+                ORDER BY location <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geometry
+                LIMIT 1;
+            `);
 
-            safeNodes.forEach(node => {
-                const nodePoint = turf.point([node.lng, node.lat]);
-                const distance = turf.distance(userPoint, nodePoint, { units: 'meters' });
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearest = node;
-                }
-            });
+            const nearest = nearestNodeResult.rows[0];
+
+            if (!nearest) {
+                 return res.status(404).json({ error: "CRITICAL: No safe havens found in database." });
+            }
+
+            console.log(`🏥 AI Routing to Safe Haven: ${nearest.name} (${Math.round(nearest.distance_meters)}m away)`);
 
             const directions = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
                 params: {
@@ -54,14 +72,17 @@ export default async function handle_escort_call(req: Request, res: Response) {
                 }
             });
 
+            if (directions.data.status !== 'OK') {
+                console.error("🚨 GOOGLE MAPS API REJECTED REQUEST:", directions.data.status);
+                return res.json({ ...callResponse, routeError: "Failed to generate escape route." });
+            }
+
             const currentRoute = directions.data.routes[0];
             const currentLeg = currentRoute.legs[0];
 
-            // ✅ 2. Decode the polyline into an array of {lat, lng} objects
             const decodedPath = polyline.decode(currentRoute.overview_polyline.points);
             const coordinates = decodedPath.map((p: number[]) => ({ lat: p[0], lng: p[1] }));
 
-            // ✅ 3. Grab the walking instructions for the UI
             const nextInstruction = currentLeg.steps && currentLeg.steps.length > 0 
                 ? currentLeg.steps[0].html_instructions 
                 : "Proceed to the destination immediately.";
@@ -71,7 +92,7 @@ export default async function handle_escort_call(req: Request, res: Response) {
                 lng,
                 safeHavenName: nearest.name,
                 distanceToSafety: currentLeg.distance.text,
-                sensorMagnitude: 0,
+                sensorMagnitude: 0, 
                 timeOfIncident: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }),
             }).catch(e => console.error("Escort SOS Broadcast failed:", e));
 
@@ -79,7 +100,12 @@ export default async function handle_escort_call(req: Request, res: Response) {
                 ...callResponse, 
                 emergencyData: {
                     message: "🚨 AI DETECTED DISTRESS - REROUTING",
-                    safeHaven: nearest,
+                    safeHaven: {
+                        name: nearest.name,
+                        type: nearest.type,
+                        lat: nearest.lat,
+                        lng: nearest.lng
+                    },
                     safeHavenName: nearest.name, 
                     polyline: currentRoute.overview_polyline.points,
                     coordinates: coordinates,

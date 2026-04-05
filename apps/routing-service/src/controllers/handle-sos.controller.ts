@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as turf from '@turf/turf';
 import axios from 'axios';
-import safeNodes from '../data/safe-nodes.json';
+import { sql } from 'drizzle-orm';
+import { db } from '../db'; 
 import { broadcastSOS } from '../services/notification.service';
 import 'dotenv/config';
 
@@ -9,20 +9,42 @@ export default async function handle_sos(req: Request, res: Response) {
     try {
         const { lat, lng } = req.body;
 
-        if (!lat || !lng) return res.status(400).json({ error: "Location missing" });
+        if (!lat || !lng) {
+            return res.status(400).json({ error: "Location missing" });
+        }
 
-        const userPoint = turf.point([lng, lat]);
-        let nearest = safeNodes[0];
-        let minDistance = Infinity;
+        console.log(`🚨 [SOS TRIGGERED] Locating nearest safe haven for: ${lat}, ${lng}`);
 
-        safeNodes.forEach(node => {
-            const nodePoint = turf.point([node.lng, node.lat]);
-            const distance = turf.distance(userPoint, nodePoint, { units: 'meters' });
-            if (distance < minDistance) {
-                minDistance = distance;
-                nearest = node;
-            }
-        });
+        const nearestNodeResult = await db.execute<{ 
+            id: number, 
+            name: string, 
+            type: string,
+            lat: number, 
+            lng: number, 
+            distance_meters: number 
+        }>(sql`
+            SELECT 
+                id,
+                name,
+                type,
+                ST_Y(location::geometry) as lat,
+                ST_X(location::geometry) as lng,
+                ST_Distance(
+                    location::geography, 
+                    ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
+                ) as distance_meters
+            FROM safe_nodes
+            ORDER BY location <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geometry
+            LIMIT 1;
+        `);
+
+        const nearest = nearestNodeResult.rows[0];
+
+        if (!nearest) {
+            return res.status(404).json({ error: "CRITICAL: No safe havens found in database." });
+        }
+
+        console.log(`🏥 Found Safe Haven: ${nearest.name} (${Math.round(nearest.distance_meters)}m away)`);
 
         const directions = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
             params: {
@@ -34,9 +56,9 @@ export default async function handle_sos(req: Request, res: Response) {
             proxy: false
         });
 
-        console.log("KEY", process.env.GOOGLE_CLOUD_API_KEY);
         if (directions.data.status !== 'OK') {
             console.error("🚨 GOOGLE MAPS API REJECTED REQUEST:", directions.data.status, directions.data.error_message);
+            return res.status(502).json({ error: "Failed to generate escape route." });
         }
 
         if (!directions.data.routes || directions.data.routes.length === 0) {
@@ -47,8 +69,8 @@ export default async function handle_sos(req: Request, res: Response) {
         const currentLeg = currentRoute.legs[0];
         
         const nextInstruction = currentLeg.steps && currentLeg.steps.length > 0 
-        ? currentLeg.steps[0].html_instructions 
-        : "Proceed to the destination.";
+            ? currentLeg.steps[0].html_instructions 
+            : "Proceed directly to the destination.";
         
         broadcastSOS({
             lat,
@@ -61,7 +83,12 @@ export default async function handle_sos(req: Request, res: Response) {
 
         res.json({
             message: "🚨 EMERGENCY REROUTE ACTIVE",
-            safeHaven: nearest,
+            safeHaven: {
+                name: nearest.name,
+                type: nearest.type,
+                lat: nearest.lat,
+                lng: nearest.lng
+            },
             polyline: currentRoute.overview_polyline.points,
             distance: currentLeg.distance.text,
             duration: currentLeg.duration.text,
@@ -70,6 +97,6 @@ export default async function handle_sos(req: Request, res: Response) {
 
     } catch (error: any) {
         console.error("SOS Route Error:", error.response?.data || error.message);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Internal SOS routing failure." });
     }
 }
